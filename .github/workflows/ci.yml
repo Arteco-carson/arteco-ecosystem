@@ -1,0 +1,138 @@
+name: Fine Art Ecosystem CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Job for the Arteco Collection Manager Frontend
+  build-acm-frontend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
+    paths:
+      - 'arteco-acm-frontend/**'
+    
+    defaults:
+      run:
+        working-directory: ./arteco-acm-frontend
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: arteco-acm-frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Run tests
+      run: npm test -- --watchAll=false
+
+    - name: Build
+      run: npm run build
+
+  # Job for the Arteco Defect Reporting Frontend
+  build-dr-frontend:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
+    paths:
+      - 'arteco-dr-frontend/**'
+
+    defaults:
+      run:
+        working-directory: ./arteco-dr-frontend
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: arteco-dr-frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build
+      run: npm run build
+
+  # Job for the .NET API Backend
+  build-api:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
+    paths:
+      - 'FineArtApi/**'
+
+    defaults:
+      run:
+        working-directory: ./FineArtApi
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up .NET 8
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+  # Job for the Arteco Collection Manager Mobile App
+  install-acm-mobile-deps:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
+    paths:
+      - 'arteco-acm-mobile/**'
+    
+    defaults:
+      run:
+        working-directory: ./arteco-acm-mobile
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: arteco-acm-mobile/package-lock.json
+
+    - name: Install dependencies
+      run: npm install
+
+  # Job for the Arteco Defect Reporting Mobile App
+  install-dr-mobile-deps:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
+    paths:
+      - 'arteco-dr-mobile/**'
+    
+    defaults:
+      run:
+        working-directory: ./arteco-dr-mobile
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: arteco-dr-mobile/package-lock.json
+
+    - name: Install dependencies
+      run: npm install

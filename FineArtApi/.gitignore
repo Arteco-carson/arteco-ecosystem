@@ -1,0 +1,25 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Rider
+.idea/
+*.sln.iml
+
+# User-specific files
+*.rsuser
+
+# App settings
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+
+# Tooling
+.config/dotnet-tools.json

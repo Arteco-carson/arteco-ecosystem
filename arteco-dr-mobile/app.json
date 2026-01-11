@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Arteco Defect Reporting",
+    "slug": "arteco-defect-reporting",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#ffffff"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "73b1f96e-ff5e-4eb1-8c70-da9a84607518"
+      }
+    },
+    "android": {
+      "package": "com.irishspurs.artecodefectreporting"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Allow Defect Reporter to access your camera to capture images of defects."
+        }
+      ],
+      "expo-secure-store"
+    ]
+  }
+}

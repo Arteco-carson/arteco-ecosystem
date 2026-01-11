@@ -1,0 +1,33 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+dist/
+build/
+.env
+
+# React
+/.pnp
+.pnp.js
+coverage/
+.DS_Store
+
+# Visual Studio / .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Logs
+*.log
+
+# OS
+Thumbs.db
+*.swp
+ehthumbs.db
+
+# Application settings
+appsettings.Production.json
