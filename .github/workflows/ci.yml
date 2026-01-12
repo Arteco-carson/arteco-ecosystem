@@ -7,13 +7,37 @@ on:
     branches: [ main ]
 
 jobs:
+  # This first job determines which parts of the project have changed.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      acm-frontend: ${{ steps.filter.outputs.acm-frontend }}
+      dr-frontend: ${{ steps.filter.outputs.dr-frontend }}
+      api: ${{ steps.filter.outputs.api }}
+      acm-mobile: ${{ steps.filter.outputs.acm-mobile }}
+      dr-mobile: ${{ steps.filter.outputs.dr-mobile }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          acm-frontend:
+            - 'arteco-acm-frontend/**'
+          dr-frontend:
+            - 'arteco-dr-frontend/**'
+          api:
+            - 'FineArtApi/**'
+          acm-mobile:
+            - 'arteco-acm-mobile/**'
+          dr-mobile:
+            - 'arteco-dr-mobile/**'
+
   # Job for the Arteco Collection Manager Frontend
   build-acm-frontend:
+    needs: changes
+    if: needs.changes.outputs.acm-frontend == 'true'
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
-    paths:
-      - 'arteco-acm-frontend/**'
-    
     defaults:
       run:
         working-directory: ./arteco-acm-frontend
@@ -39,11 +63,9 @@ jobs:
 
   # Job for the Arteco Defect Reporting Frontend
   build-dr-frontend:
+    needs: changes
+    if: needs.changes.outputs.dr-frontend == 'true'
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
-    paths:
-      - 'arteco-dr-frontend/**'
-
     defaults:
       run:
         working-directory: ./arteco-dr-frontend
@@ -66,11 +88,9 @@ jobs:
 
   # Job for the .NET API Backend
   build-api:
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
-    paths:
-      - 'FineArtApi/**'
-
     defaults:
       run:
         working-directory: ./FineArtApi
@@ -91,11 +111,9 @@ jobs:
 
   # Job for the Arteco Collection Manager Mobile App
   install-acm-mobile-deps:
+    needs: changes
+    if: needs.changes.outputs.acm-mobile == 'true'
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
-    paths:
-      - 'arteco-acm-mobile/**'
-    
     defaults:
       run:
         working-directory: ./arteco-acm-mobile
@@ -115,11 +133,9 @@ jobs:
 
   # Job for the Arteco Defect Reporting Mobile App
   install-dr-mobile-deps:
+    needs: changes
+    if: needs.changes.outputs.dr-mobile == 'true'
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && contains(join(github.event.commits.*.message), '[ci skip]')) == false
-    paths:
-      - 'arteco-dr-mobile/**'
-    
     defaults:
       run:
         working-directory: ./arteco-dr-mobile
