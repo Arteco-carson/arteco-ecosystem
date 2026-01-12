@@ -68,7 +68,10 @@ var app = builder.Build();
 
 // Always enable Swagger and SwaggerUI for API documentation and testing
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Fine Art API V1");
+});
 
 if (app.Environment.IsDevelopment())
 {
