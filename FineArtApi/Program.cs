@@ -66,10 +66,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Always enable Swagger and SwaggerUI for API documentation and testing
+app.UseSwagger();
+app.UseSwaggerUI();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // Development-specific configurations can go here
 }
 
 app.UseStaticFiles(); // Serve files from wwwroot
