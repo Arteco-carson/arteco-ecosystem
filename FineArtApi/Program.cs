@@ -11,6 +11,7 @@ using FineArtApi.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. AUTHENTICATION SERVICES (ISO27001 Compliance) ---
+// --- Update to redeploy
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
