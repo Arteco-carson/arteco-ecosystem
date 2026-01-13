@@ -23,19 +23,24 @@ function Register() {
   ]);
 
   useEffect(() => {
-    const fetchRoles = async () => {
+    const fetchRoles = async (retries = 3) => {
       try {
         const response = await fetch(`${API_URL}/api/userroles`);
         if (response.ok) {
           const data = await response.json();
           if (data && data.length > 0) {
             setRoles(data);
+            return;
           }
-        } else {
-          console.warn(`Failed to fetch roles: ${response.status}`);
         }
+        throw new Error(`Status: ${response.status}`);
       } catch (err) {
-        console.warn('Could not fetch roles dynamically, using defaults.');
+        if (retries > 0) {
+          // Retry with backoff (500ms, 1000ms, 2000ms) to handle cold starts
+          setTimeout(() => fetchRoles(retries - 1), 500 * Math.pow(2, 3 - retries));
+        } else {
+          console.warn('Could not fetch roles dynamically, using defaults.');
+        }
       }
     };
     fetchRoles();
