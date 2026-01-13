@@ -70,9 +70,21 @@ builder.Services.AddControllers().AddJsonOptions(options => {
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
+
+// --- FIX: Robust Connection String Fallback ---
+// If GetConnectionString returns empty (e.g. from empty appsettings.json), try other config locations
+if (string.IsNullOrWhiteSpace(connectionString))
 {
-    Console.WriteLine("[Startup] CRITICAL: DefaultConnection string is missing or empty.");
+    connectionString = builder.Configuration["DefaultConnection"];
+}
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    connectionString = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_DefaultConnection");
+}
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    Console.WriteLine("[Startup] CRITICAL: DefaultConnection string is missing or empty. Database operations will fail.");
 }
 
 builder.Services.AddDbContext<ArtContext>(options =>
