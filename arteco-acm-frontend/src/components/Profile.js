@@ -30,13 +30,13 @@ const Profile = () => {
     if (!token) return navigate('/login');
 
     try {
-      const response = await fetch('`${API_URL}/api/user/profile', {
+      const response = await fetch(`${API_URL}/api/user/profile`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       const data = await response.json();
       setUser(prev => ({ ...prev, ...data }));
 
-      const locResponse = await fetch('`${API_URL}/api/locations', {
+      const locResponse = await fetch(`${API_URL}/api/locations`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       if (locResponse.ok) {
@@ -44,7 +44,7 @@ const Profile = () => {
         setLocations(locData);
       }
 
-      const roleResponse = await fetch('`${API_URL}/api/userroles', {
+      const roleResponse = await fetch(`${API_URL}/api/userroles`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       if (roleResponse.ok) {
@@ -52,7 +52,7 @@ const Profile = () => {
         setRoles(roleData);
       }
 
-      const currencyResponse = await fetch('`${API_URL}/api/user/currencies', {
+      const currencyResponse = await fetch(`${API_URL}/api/user/currencies`, {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
       if (currencyResponse.ok) {
@@ -82,7 +82,7 @@ const Profile = () => {
     setUpdateLoading(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('`${API_URL}/api/user/profile', {
+      const response = await fetch(`${API_URL}/api/user/profile`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`, 
@@ -110,7 +110,7 @@ const Profile = () => {
     setLocationLoading(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch('`${API_URL}/api/locations', {
+      const response = await fetch(`${API_URL}/api/locations`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`, 
@@ -152,7 +152,7 @@ const Profile = () => {
     setEditLocationLoading(true);
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(``${API_URL}/api/locations/${selectedLocation.locationId}`, {
+      const response = await fetch(`${API_URL}/api/locations/${selectedLocation.locationId}`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`, 
@@ -187,7 +187,7 @@ const Profile = () => {
         setEditLocationLoading(true);
         const token = localStorage.getItem('token');
         try {
-          const response = await fetch(``${API_URL}/api/locations/${selectedLocation.locationId}`, {
+          const response = await fetch(`${API_URL}/api/locations/${selectedLocation.locationId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
           });
