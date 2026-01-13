@@ -53,9 +53,13 @@ function Register() {
       if (response.ok) {
         navigate('/login', { state: { message: 'Profile created successfully. Please log in.' } });
       } else {
-        const data = await response.json();
-        // Handle validation errors or logic errors from backend
-        setError(data.message || 'Registration failed. Please check your details.');
+        try {
+          const data = await response.json();
+          setError(data.message || 'Registration failed. Please check your details.');
+        } catch (parseError) {
+          // Fallback if the 500 error returns HTML (common in IIS/Azure)
+          setError(`Server Error (${response.status}): Please contact support.`);
+        }
       }
     } catch (err) {
       setError('System Error: Could not connect to the registration service.');
