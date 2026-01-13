@@ -12,7 +12,7 @@ function Register() {
     username: '',
     email: '',
     password: '',
-    userRole: 'Manager',
+    roleId: 1,
     marketingConsent: false
   });
   const [error, setError] = useState('');
@@ -38,7 +38,8 @@ function Register() {
       email: formData.email,
       password: formData.password,
       externalUserId: formData.email, // Using email as the unique external ID
-      userRole: formData.userRole,
+      roleId: parseInt(formData.roleId, 10),
+      userTypeId: 2,
       marketingConsent: formData.marketingConsent
     };
 
@@ -155,12 +156,12 @@ function Register() {
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', fontSize: '0.85rem' }}>System Role</label>
             <select 
               style={{ ...inputStyle, paddingLeft: '12px', backgroundColor: '#f8fafc' }}
-              value={formData.userRole}
-              onChange={(e) => setFormData({...formData, userRole: e.target.value})}
+              value={formData.roleId}
+              onChange={(e) => setFormData({...formData, roleId: e.target.value})}
             >
-              <option value="Guest">Guest</option>
-              <option value="Manager">Manager (Operations)</option>
-              <option value="Admin">Admin (IT/Head of Ops)</option>
+              <option value={1}>Guest</option>
+              <option value={2}>Manager (Operations)</option>
+              <option value={3}>Admin (IT/Head of Ops)</option>
             </select>
           </div>
 
