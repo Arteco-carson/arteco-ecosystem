@@ -143,6 +143,7 @@ function Register() {
               <Lock size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#94a3b8' }} />
               <input 
                 type="password" required
+                autoComplete="new-password"
                 style={inputStyle}
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}

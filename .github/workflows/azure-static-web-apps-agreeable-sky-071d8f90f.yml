@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     env:
-      REACT_APP_API_URL: "https://arteco-fineartapi-prod-bxetekage3a2b6em.eastus2-01.azurewebsites.net/"
+      REACT_APP_API_URL: "https://arteco-fineartapi-prod-bxetekage3a2b6em.eastus2-01.azurewebsites.net"
     steps:
       - uses: actions/checkout@v3
         with:

@@ -48,8 +48,16 @@ builder.Services.AddAuthentication(options => {
     };
 });
 
+var frontendUrl = builder.Configuration["FrontendUrl"] ?? "https://agreeable-sky-071d8f90f.2.azurestaticapps.net";
+
 builder.Services.AddCors(options => {
-    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+    options.AddPolicy("AllowSpecificOrigin",
+        policy =>
+        {
+            policy.WithOrigins(frontendUrl)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 builder.Services.AddControllers().AddJsonOptions(options => {
@@ -80,7 +88,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles(); // Serve files from wwwroot
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigin");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
