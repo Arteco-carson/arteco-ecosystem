@@ -21,6 +21,7 @@ namespace FineArtApi.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles()
         {
             return await _context.Set<UserRole>().ToListAsync();

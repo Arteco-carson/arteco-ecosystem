@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, ConfigProvider } from 'antd';
 import { User, Mail, Lock, ChevronLeft, UserCircle, Tag } from 'lucide-react';
@@ -16,6 +16,26 @@ function Register() {
     marketingConsent: false
   });
   const [error, setError] = useState('');
+  const [roles, setRoles] = useState([
+    { roleId: 1, roleName: 'Guest' },
+    { roleId: 2, roleName: 'Manager (Operations)' },
+    { roleId: 3, roleName: 'Admin (IT/Head of Ops)' }
+  ]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/userroles`);
+        if (response.ok) {
+          const data = await response.json();
+          setRoles(data);
+        }
+      } catch (err) {
+        console.warn('Could not fetch roles dynamically, using defaults.');
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const inputStyle = {
     width: '100%',
@@ -163,9 +183,11 @@ function Register() {
               value={formData.roleId}
               onChange={(e) => setFormData({...formData, roleId: e.target.value})}
             >
-              <option value={1}>Guest</option>
-              <option value={2}>Manager (Operations)</option>
-              <option value={3}>Admin (IT/Head of Ops)</option>
+              {roles.map(role => (
+                <option key={role.roleId} value={role.roleId}>
+                  {role.roleName}
+                </option>
+              ))}
             </select>
           </div>
 

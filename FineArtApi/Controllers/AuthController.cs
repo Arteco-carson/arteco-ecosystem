@@ -38,13 +38,13 @@ namespace FineArtApi.Controllers
 
             CreatePasswordHash(registerDto.Password, out string passwordHash, out string passwordSalt);
 
-            // Determine UserType (Customer, Employee) based on input
-            var userType = await _context.UserTypes.FirstOrDefaultAsync(ut => ut.UserTypeName == registerDto.UserRole);
-            
-            // Determine System Role. Default to Guest unless Admin is explicitly requested.
-            string roleName = (registerDto.UserRole == "Admin" || registerDto.UserRole == "Administrator") ? "Administrator" : "Guest";
-            var role = await _context.Set<UserRole>().FirstOrDefaultAsync(r => r.RoleName == roleName) 
-                       ?? await _context.Set<UserRole>().FirstAsync(r => r.RoleName == "Guest");
+            // Validate RoleId exists
+            if (!await _context.Set<UserRole>().AnyAsync(r => r.RoleId == registerDto.RoleId))
+                return BadRequest(new { message = "Invalid Role ID" });
+
+            // Validate UserTypeId exists
+            if (!await _context.UserTypes.AnyAsync(ut => ut.UserTypeId == registerDto.UserTypeId))
+                return BadRequest(new { message = "Invalid User Type ID" });
 
             var user = new UserProfile
             {
@@ -56,8 +56,8 @@ namespace FineArtApi.Controllers
                 Salt = passwordSalt,
                 CreatedAt = DateTime.UtcNow,
                 ExternalUserId = Guid.NewGuid().ToString(),
-                RoleId = role.RoleId,
-                UserTypeId = userType?.UserTypeId,
+                RoleId = registerDto.RoleId,
+                UserTypeId = registerDto.UserTypeId,
                 IsActive = true,
                 MarketingConsent = registerDto.MarketingConsent
             };
@@ -65,7 +65,7 @@ namespace FineArtApi.Controllers
             _context.UserProfiles.Add(user);
             await _context.SaveChangesAsync();
 
-            await _auditService.LogAsync("UserProfiles", user.ProfileId, "INSERT", user.ProfileId, null, new { user.Username, user.EmailAddress, user.RoleId });
+            await _auditService.LogAsync("UserProfiles", user.ProfileId, "INSERT", user.ProfileId, null, new { user.Username, user.EmailAddress, user.RoleId, user.UserTypeId });
 
             return Ok(new { message = "Registration successful" });
         }
@@ -198,8 +198,10 @@ namespace FineArtApi.Controllers
         public string FirstName { get; set; } = string.Empty;
         [JsonPropertyName("lastName")]
         public string LastName { get; set; } = string.Empty;
-        [JsonPropertyName("userRole")]
-        public string UserRole { get; set; } = "Guest";
+        [JsonPropertyName("roleId")]
+        public int RoleId { get; set; }
+        [JsonPropertyName("userTypeId")]
+        public int UserTypeId { get; set; }
         [JsonPropertyName("marketingConsent")]
         public bool MarketingConsent { get; set; }
     }
