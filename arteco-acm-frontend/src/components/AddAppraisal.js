@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, BadgePoundSterling, Save, User, Palette, Loader2 } from 'lucide-react';
+import API_URL from './api';
 
 function AddAppraisal() {
   const { artworkId } = useParams();
@@ -25,7 +26,7 @@ function AddAppraisal() {
       return;
     }
 
-    fetch(`http://localhost:5240/api/artworks`, {
+    fetch(`${API_URL}/api/artworks`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -58,7 +59,7 @@ function AddAppraisal() {
 
     try {
       // Step A: Save Appraisal Record (Verified Working)
-      const appraisalResponse = await fetch('http://localhost:5240/api/appraisals', {
+      const appraisalResponse = await fetch(`${API_URL}/api/appraisals`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

@@ -48,7 +48,12 @@ builder.Services.AddAuthentication(options => {
     };
 });
 
-var frontendUrl = builder.Configuration["FrontendUrl"] ?? "https://agreeable-sky-071d8f90f.2.azurestaticapps.net";
+var frontendUrl = builder.Configuration["FrontendUrl"];
+if (string.IsNullOrEmpty(frontendUrl))
+{
+    frontendUrl = "https://agreeable-sky-071d8f90f.2.azurestaticapps.net";
+}
+Console.WriteLine($"[Startup] CORS Configured for FrontendUrl: {frontendUrl}");
 
 builder.Services.AddCors(options => {
     options.AddPolicy("AllowSpecificOrigin",
@@ -64,8 +69,14 @@ builder.Services.AddControllers().AddJsonOptions(options => {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase; 
 });
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    Console.WriteLine("[Startup] CRITICAL: DefaultConnection string is missing or empty.");
+}
+
 builder.Services.AddDbContext<ArtContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 // Register the Audit Service
 builder.Services.AddScoped<IAuditService, AuditService>();

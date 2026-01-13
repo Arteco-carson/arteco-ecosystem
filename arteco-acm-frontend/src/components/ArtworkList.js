@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Image as ImageIcon, AlertCircle, Trash2 } from 'lucide-react';
 import { Button, ConfigProvider, Modal } from 'antd';
 import AddArtworkModal from './AddArtworkModal';
+import API_URL from './api';
 
 function ArtworkList() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ function ArtworkList() {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5240/api/artworks/user', {
+      const response = await fetch(`${API_URL}/api/artworks/user`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token.trim()}`,
@@ -65,7 +66,7 @@ function ArtworkList() {
         if (!token) return;
 
         try {
-          const response = await fetch(`http://localhost:5240/api/artworks/${artworkId}`, {
+          const response = await fetch(`${API_URL}/api/artworks/${artworkId}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token.trim()}` }
           });

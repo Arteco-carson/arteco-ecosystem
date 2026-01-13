@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Globe, Frame, User } from 'lucide-react';
 import { Button, Modal, Upload, message, ConfigProvider } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import API_URL from './api';
 
 function ArtistDetails() {
   const { id } = useParams();
@@ -16,7 +17,7 @@ function ArtistDetails() {
   const [messageApi, contextHolder] = message.useMessage();
 
   useEffect(() => {
-    fetch(`http://localhost:5240/api/artists/${id}`, {
+    fetch(`${API_URL}/api/artists/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -45,7 +46,7 @@ function ArtistDetails() {
       });
 
       // Reuse the existing artwork upload endpoint which uploads to Azure and returns a URL
-      const uploadRes = await fetch('http://localhost:5240/api/artworks/upload-images', {
+      const uploadRes = await fetch(`${API_URL}/api/artworks/upload-images`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -69,7 +70,7 @@ function ArtistDetails() {
       };
 
       // Update the artist record with the new image URL
-      const updateRes = await fetch(`http://localhost:5240/api/artists/${id}`, {
+      const updateRes = await fetch(`${API_URL}/api/artists/${id}`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,

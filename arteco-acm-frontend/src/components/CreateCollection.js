@@ -32,7 +32,7 @@ const CreateCollection = () => {
                 navigate('/login');
                 return;
             }
-            const res = await axios.get('http://localhost:5240/api/artworks/user', { headers });
+            const res = await axios.get(`${API_URL}/api/artworks/user`, { headers });
             const formattedArtworks = res.data.map(art => ({
                 key: art.artworkId.toString(),
                 title: art.title,
@@ -67,7 +67,7 @@ const CreateCollection = () => {
           artworkIds: targetKeys.map(key => parseInt(key, 10)),
       };
 
-      await axios.post('http://localhost:5240/api/collections', payload, { headers });
+      await axios.post(`${API_URL}/api/collections`, payload, { headers });
       message.success('Collection created successfully!');
       navigate('/collections');
     } catch (error) {

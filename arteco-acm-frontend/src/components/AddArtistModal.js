@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, Button, InputNumber, Space, message } from 'antd';
 import axios from 'axios';
+import API_URL from './api';
 
 const { TextArea } = Input;
 
@@ -17,7 +18,7 @@ const AddArtistModal = ({ visible, onClose, onArtistCreated }) => {
                 return;
             }
             const headers = { Authorization: `Bearer ${token.trim()}` };
-            const res = await axios.post('http://localhost:5240/api/artists', values, { headers });
+            const res = await axios.post(`${API_URL}/api/artists`, values, { headers });
             const newArtist = res.data;
             
             message.success(`Artist "${newArtist.firstName} ${newArtist.lastName}" created.`);

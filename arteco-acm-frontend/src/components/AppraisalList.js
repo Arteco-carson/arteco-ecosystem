@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { History, Calendar, User, FileText, Plus } from 'lucide-react';
 import { Button } from 'antd';
+import API_URL from './api';
 
 function AppraisalList() {
   const [appraisals, setAppraisals] = useState([]);
@@ -10,7 +11,7 @@ function AppraisalList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:5240/api/appraisals', {
+    fetch(`${API_URL}/api/appraisals`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

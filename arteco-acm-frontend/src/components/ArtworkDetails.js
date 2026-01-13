@@ -19,6 +19,7 @@ import {
   Edit,
   AlertTriangle
 } from 'lucide-react';
+import API_URL from './api';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -46,7 +47,7 @@ function ArtworkDetails() {
     }
     setLoading(true);
 
-    fetch(`http://localhost:5240/api/artworks/${id}`, {
+    fetch(`${API_URL}/api/artworks/${id}`, {
       headers: { 
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -67,7 +68,7 @@ function ArtworkDetails() {
   };
 
   const fetchLocations = () => {
-    fetch('http://localhost:5240/api/locations', {
+    fetch(`${API_URL}/api/locations`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     .then(res => res.json())
@@ -76,7 +77,7 @@ function ArtworkDetails() {
   };
 
   const fetchDefectReports = () => {
-    fetch(`http://localhost:5240/api/DefectReports/artwork/${id}`, {
+    fetch(`${API_URL}/api/DefectReports/artwork/${id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     .then(res => {
@@ -121,7 +122,7 @@ function ArtworkDetails() {
         acquisitionDate: values.acquisitionDate ? values.acquisitionDate.format('YYYY-MM-DD') : null
       };
 
-      const response = await fetch(`http://localhost:5240/api/artworks/${id}`, {
+      const response = await fetch(`${API_URL}/api/artworks/${id}`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -156,7 +157,7 @@ function ArtworkDetails() {
         formData.append('files', file.originFileObj);
       });
 
-      const uploadRes = await fetch('http://localhost:5240/api/artworks/upload-images', {
+      const uploadRes = await fetch(`${API_URL}/api/artworks/upload-images`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -165,7 +166,7 @@ function ArtworkDetails() {
       if (!uploadRes.ok) throw new Error('Upload failed');
       const uploadData = await uploadRes.json();
       
-      const linkRes = await fetch(`http://localhost:5240/api/artworks/${id}/images`, {
+      const linkRes = await fetch(`${API_URL}/api/artworks/${id}/images`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

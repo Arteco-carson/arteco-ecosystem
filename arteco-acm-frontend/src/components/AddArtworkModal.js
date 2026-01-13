@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Form, Input, Button, message, Modal, InputNumber, Space, Upload, Select, Checkbox, Divider, Row, Col } from 'antd';
 import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import AddArtistModal from './AddArtistModal';
+import API_URL from './api';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -38,7 +39,7 @@ const AddArtworkModal = ({ open, onClose, onArtworkCreated }) => {
       try {
         const headers = getAuthHeader();
         if (!headers) return;
-        const res = await axios.get('http://localhost:5240/api/artists', { headers });
+        const res = await axios.get(`${API_URL}/api/artists`, { headers });
         setArtists(res.data);
       } catch (error) {
         console.error('Failed to fetch artists:', error);
@@ -52,7 +53,7 @@ const AddArtworkModal = ({ open, onClose, onArtworkCreated }) => {
       try {
         const headers = getAuthHeader();
         if (!headers) return;
-        const res = await axios.get('http://localhost:5240/api/artworks/editions', { headers });
+        const res = await axios.get(`${API_URL}/api/artworks/editions`, { headers });
         console.log("Editions loaded:", res.data);
         setEditions(res.data);
       } catch (error) {
@@ -70,7 +71,7 @@ const AddArtworkModal = ({ open, onClose, onArtworkCreated }) => {
       try {
         const headers = getAuthHeader();
         if (!headers) return;
-        const res = await axios.get('http://localhost:5240/api/locations', { headers });
+        const res = await axios.get(`${API_URL}/api/locations`, { headers });
         setLocations(res.data);
       } catch (error) {
         console.error('Failed to fetch locations:', error);
@@ -101,7 +102,7 @@ const AddArtworkModal = ({ open, onClose, onArtworkCreated }) => {
           formData.append('files', file.originFileObj);
         });
 
-        const uploadRes = await axios.post('http://localhost:5240/api/artworks/upload-images', formData, {
+        const uploadRes = await axios.post(`${API_URL}/api/artworks/upload-images`, formData, {
           headers: {
             ...headers,
             'Content-Type': 'multipart/form-data',
@@ -111,7 +112,7 @@ const AddArtworkModal = ({ open, onClose, onArtworkCreated }) => {
       }
 
       const payload = { ...values, imageUrls };
-      const res = await axios.post('http://localhost:5240/api/artworks', payload, { headers });
+      const res = await axios.post(`${API_URL}/api/artworks`, payload, { headers });
       
       message.success(`Artwork "${res.data.title}" created successfully.`);
       

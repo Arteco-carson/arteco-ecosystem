@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { User, Globe, ExternalLink, Plus } from 'lucide-react';
 import { Button, ConfigProvider } from 'antd';
 import AddArtistModal from './AddArtistModal';
+import API_URL from './api';
 
 function ArtistList() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ function ArtistList() {
 
   const fetchArtists = useCallback(() => {
     setLoading(true);
-    fetch('http://localhost:5240/api/artworks/user/artists', {
+    fetch(`${API_URL}/api/artworks/user/artists`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

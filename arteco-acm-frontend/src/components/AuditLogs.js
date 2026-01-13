@@ -3,6 +3,7 @@ import { Table, Tag, Button, Modal, Card, Typography, ConfigProvider, DatePicker
 import { EyeOutlined } from '@ant-design/icons';
 import { ShieldCheck, Download, Search, RefreshCw } from 'lucide-react';
 import dayjs from 'dayjs';
+import API_URL from './api';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -31,7 +32,7 @@ const AuditLogs = () => {
     if (currentFilters.entityName) params.append('entityName', currentFilters.entityName);
 
     try {
-      const response = await fetch(`http://localhost:5240/api/auditlogs?${params.toString()}`, {
+      const response = await fetch(`${API_URL}/api/auditlogs?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {

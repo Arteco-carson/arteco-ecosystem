@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Card, Col, Row, Spin, Typography, Select, Alert, Button, ConfigProvider, Modal, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import API_URL from './api';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -35,7 +36,7 @@ const CollectionsList = () => {
         return;
       }
 
-      const res = await axios.get(`http://localhost:5240/api/artworks/user?collectionId=${collectionId}`, {
+      const res = await axios.get(`${API_URL}/api/artworks/user?collectionId=${collectionId}`, {
         headers
       });
       setArtworks(res.data);
@@ -68,7 +69,7 @@ const CollectionsList = () => {
       onOk: async () => {
         try {
           const headers = getAuthHeader();
-          await axios.delete(`http://localhost:5240/api/collections/${selectedCollection}`, { headers });
+          await axios.delete(`${API_URL}/api/collections/${selectedCollection}`, { headers });
           
           const updatedCollections = collections.filter(c => c.collectionId !== selectedCollection);
           setCollections(updatedCollections);
@@ -94,7 +95,7 @@ const CollectionsList = () => {
   const fetchUnassignedArtworks = useCallback(async () => {
     try {
         const headers = getAuthHeader();
-        const res = await axios.get('http://localhost:5240/api/artworks/user?unassigned=true', { headers });
+        const res = await axios.get(`${API_URL}/api/artworks/user?unassigned=true`, { headers });
         setUnassignedArtworks(res.data);
     } catch (err) {
         console.error("Failed to fetch unassigned artworks", err);
@@ -106,7 +107,7 @@ const CollectionsList = () => {
       setAddingArtworks(true);
       try {
           const headers = getAuthHeader();
-          await axios.post(`http://localhost:5240/api/collections/${selectedCollection}/artworks`, selectedArtworkIds, { headers });
+          await axios.post(`${API_URL}/api/collections/${selectedCollection}/artworks`, selectedArtworkIds, { headers });
           messageApi.success('Artworks added to collection.');
           setIsAddModalVisible(false);
           fetchArtworksForCollection(selectedCollection);
@@ -128,7 +129,7 @@ const CollectionsList = () => {
           return;
         }
 
-        const res = await axios.get('http://localhost:5240/api/collections', { headers });
+        const res = await axios.get(`${API_URL}/api/collections`, { headers });
         setCollections(res.data);
         
         // Check session storage for a previously selected collection
