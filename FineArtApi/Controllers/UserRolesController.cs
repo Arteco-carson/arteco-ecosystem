@@ -5,6 +5,7 @@ using FineArtApi.Data;
 using FineArtApi.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace FineArtApi.Controllers
 {
@@ -22,9 +23,20 @@ namespace FineArtApi.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<UserRole>>> GetUserRoles()
+        public async Task<ActionResult<IEnumerable<object>>> GetUserRoles()
         {
-            return await _context.Set<UserRole>().ToListAsync();
+            try
+            {
+                // Use projection to avoid serialization loops and ensure only necessary data is sent
+                return await _context.Set<UserRole>()
+                    .Select(r => new { r.RoleId, r.RoleName })
+                    .ToListAsync();
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine($"[Error] GetUserRoles: {ex.Message}");
+                return StatusCode(500, new { message = "Internal Server Error fetching roles." });
+            }
         }
     }
 }

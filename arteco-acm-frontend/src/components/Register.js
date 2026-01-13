@@ -28,7 +28,11 @@ function Register() {
         const response = await fetch(`${API_URL}/api/userroles`);
         if (response.ok) {
           const data = await response.json();
-          setRoles(data);
+          if (data && data.length > 0) {
+            setRoles(data);
+          }
+        } else {
+          console.warn(`Failed to fetch roles: ${response.status}`);
         }
       } catch (err) {
         console.warn('Could not fetch roles dynamically, using defaults.');
