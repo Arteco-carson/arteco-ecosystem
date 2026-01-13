@@ -33,41 +33,49 @@ namespace FineArtApi.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if (await _context.UserProfiles.AnyAsync(u => u.Username == registerDto.Username))
-                return BadRequest(new { message = "Username already exists" });
-
-            CreatePasswordHash(registerDto.Password, out string passwordHash, out string passwordSalt);
-
-            // Validate RoleId exists
-            if (!await _context.Set<UserRole>().AnyAsync(r => r.RoleId == registerDto.RoleId))
-                return BadRequest(new { message = "Invalid Role ID" });
-
-            // Validate UserTypeId exists
-            if (!await _context.UserTypes.AnyAsync(ut => ut.UserTypeId == registerDto.UserTypeId))
-                return BadRequest(new { message = "Invalid User Type ID" });
-
-            var user = new UserProfile
+            try
             {
-                Username = registerDto.Username,
-                EmailAddress = registerDto.Email,
-                FirstName = registerDto.FirstName,
-                LastName = registerDto.LastName,
-                PasswordHash = passwordHash,
-                Salt = passwordSalt,
-                CreatedAt = DateTime.UtcNow,
-                ExternalUserId = Guid.NewGuid().ToString(),
-                RoleId = registerDto.RoleId,
-                UserTypeId = registerDto.UserTypeId,
-                IsActive = true,
-                MarketingConsent = registerDto.MarketingConsent
-            };
+                if (await _context.UserProfiles.AnyAsync(u => u.Username == registerDto.Username))
+                    return BadRequest(new { message = "Username already exists" });
 
-            _context.UserProfiles.Add(user);
-            await _context.SaveChangesAsync();
+                CreatePasswordHash(registerDto.Password, out string passwordHash, out string passwordSalt);
 
-            await _auditService.LogAsync("UserProfiles", user.ProfileId, "INSERT", user.ProfileId, null, new { user.Username, user.EmailAddress, user.RoleId, user.UserTypeId });
+                // Validate RoleId exists
+                if (!await _context.Set<UserRole>().AnyAsync(r => r.RoleId == registerDto.RoleId))
+                    return BadRequest(new { message = "Invalid Role ID" });
 
-            return Ok(new { message = "Registration successful" });
+                // Validate UserTypeId exists
+                if (!await _context.UserTypes.AnyAsync(ut => ut.UserTypeId == registerDto.UserTypeId))
+                    return BadRequest(new { message = "Invalid User Type ID" });
+
+                var user = new UserProfile
+                {
+                    Username = registerDto.Username,
+                    EmailAddress = registerDto.Email,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName,
+                    PasswordHash = passwordHash,
+                    Salt = passwordSalt,
+                    CreatedAt = DateTime.UtcNow,
+                    ExternalUserId = Guid.NewGuid().ToString(),
+                    RoleId = registerDto.RoleId,
+                    UserTypeId = registerDto.UserTypeId,
+                    IsActive = true,
+                    MarketingConsent = registerDto.MarketingConsent
+                };
+
+                _context.UserProfiles.Add(user);
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogAsync("UserProfiles", user.ProfileId, "INSERT", user.ProfileId, null, new { user.Username, user.EmailAddress, user.RoleId, user.UserTypeId });
+
+                return Ok(new { message = "Registration successful" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Register Error] {ex}");
+                return StatusCode(500, new { message = $"Registration Error: {ex.Message}", details = ex.ToString() });
+            }
         }
 
         [HttpPost("login")]

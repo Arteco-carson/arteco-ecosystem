@@ -35,7 +35,7 @@ namespace FineArtApi.Controllers
             catch (System.Exception ex)
             {
                 System.Console.WriteLine($"[Error] GetUserRoles: {ex.Message}");
-                return StatusCode(500, new { message = "Internal Server Error fetching roles." });
+                return StatusCode(500, new { message = $"Error fetching roles: {ex.Message}", details = ex.ToString() });
             }
         }
     }
