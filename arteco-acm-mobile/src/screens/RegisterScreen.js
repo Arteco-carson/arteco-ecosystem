@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert, ActivityIndicator, SafeAreaView } from 'react-native';
+import axios from 'axios';
+import { BASE_URL } from '../config/env';
 import { register as registerService } from '../services/authservice';
 import { User, Mail, Lock, Tag } from 'lucide-react-native';
 
@@ -10,10 +12,29 @@ const RegisterScreen = ({ navigation }) => {
     username: '',
     email: '',
     password: '',
-    userRole: 'Manager',
+    roleId: 1,
     marketingConsent: false
   });
+  const [roles, setRoles] = useState([
+    { roleId: 1, roleName: 'Guest' },
+    { roleId: 2, roleName: 'Manager' },
+    { roleId: 3, roleName: 'Admin' }
+  ]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}/userroles`);
+        if (response.data && response.data.length > 0) {
+          setRoles(response.data);
+        }
+      } catch (error) {
+        console.log('Failed to fetch roles, using defaults');
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -28,8 +49,15 @@ const RegisterScreen = ({ navigation }) => {
     setLoading(true);
     try {
       const payload = {
-        ...formData,
-        externalUserId: formData.email // Matching frontend logic
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        externalUserId: formData.email,
+        roleId: formData.roleId,
+        userTypeId: 2,
+        marketingConsent: formData.marketingConsent
       };
       
       await registerService(payload);
@@ -111,13 +139,13 @@ const RegisterScreen = ({ navigation }) => {
           {/* Simple Role Selection */}
           <Text style={styles.label}>System Role</Text>
           <View style={styles.roleContainer}>
-            {['Guest', 'Manager', 'Admin'].map(role => (
+            {roles.map(role => (
               <TouchableOpacity
-                key={role}
-                style={[styles.roleButton, formData.userRole === role && styles.roleButtonActive]}
-                onPress={() => handleChange('userRole', role)}
+                key={role.roleId}
+                style={[styles.roleButton, formData.roleId === role.roleId && styles.roleButtonActive]}
+                onPress={() => handleChange('roleId', role.roleId)}
               >
-                <Text style={[styles.roleText, formData.userRole === role && styles.roleTextActive]}>{role}</Text>
+                <Text style={[styles.roleText, formData.roleId === role.roleId && styles.roleTextActive]}>{role.roleName}</Text>
               </TouchableOpacity>
             ))}
           </View>
