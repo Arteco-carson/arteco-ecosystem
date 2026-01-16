@@ -59,9 +59,38 @@ builder.Services.AddCors(options => {
     options.AddPolicy("AllowSpecificOrigin",
         policy =>
         {
-            policy.WithOrigins(frontendUrl)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
+            if (builder.Environment.IsDevelopment())
+            {
+                // For local development, allow any origin to support emulators and local web clients.
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            }
+            else
+            {
+                // For production, create a strict policy that allows the web frontend and the mobile app.
+                // Mobile apps don't have a consistent origin URL; they often send a 'null' origin.
+                // We explicitly allow the web frontend URL and null origins, while blocking others.
+                // Security for the API is primarily handled by JWT authentication, not CORS.
+                policy.SetIsOriginAllowed(origin =>
+                {
+                    // Allow the web frontend
+                    if (!string.IsNullOrEmpty(origin) && origin.Equals(frontendUrl, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    // Allow 'null' origin for the native mobile app
+                    if (origin == null || origin.Equals("null", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+
+                    return false;
+                })
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            }
         });
 });
 
