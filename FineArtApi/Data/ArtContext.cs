@@ -78,6 +78,19 @@ namespace FineArtApi.Data
             modelBuilder.Entity<UserProfile>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            // EXPLICITLY DEFINE RELATIONSHIPS FOR UserProfile
+            modelBuilder.Entity<UserProfile>()
+                .HasOne(p => p.Role)
+                .WithMany() // UserRole does not have a navigation property back to UserProfile
+                .HasForeignKey(p => p.RoleId)
+                .IsRequired(); // RoleId is not nullable
+
+            modelBuilder.Entity<UserProfile>()
+                .HasOne(p => p.UserType)
+                .WithMany() // UserType does not have a navigation property back to UserProfile
+                .HasForeignKey(p => p.UserTypeId)
+                .IsRequired(false); // UserTypeId is nullable
         }
     }
 }
