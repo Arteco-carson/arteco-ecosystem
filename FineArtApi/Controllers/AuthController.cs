@@ -121,6 +121,55 @@ namespace FineArtApi.Controllers
             return Ok(new { token = tokenString, userType = user.UserType?.UserTypeName });
         }
 
+        [HttpPost("login-dr")]
+        public async Task<IActionResult> LoginDr([FromBody] LoginDto loginDto)
+        {
+            var user = await _context.UserProfiles
+                .Include(u => u.Role)
+                .Include(u => u.UserType)
+                .SingleOrDefaultAsync(u => u.Username == loginDto.Username);
+
+            if (user == null) return Unauthorized(new { message = "Invalid credentials" });
+
+            if (!VerifyPasswordHash(loginDto.Password, user.PasswordHash, user.Salt))
+                return Unauthorized(new { message = "Invalid credentials" });
+
+            // Check if the user is an Employee
+            if (user.UserType?.UserTypeName != "Employee")
+            {
+                return Unauthorized(new { message = "Access denied. Only employees can log in." });
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            // Use a secure key from config in production
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "SuperSecretKeyForDevelopmentOnly12345!");
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.ProfileId.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim("id", user.ProfileId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.ProfileId.ToString()),
+                    new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "Guest"),
+                    new Claim("usertype", user.UserType?.UserTypeName ?? "")
+                }),
+                Expires = DateTime.UtcNow.AddDays(7),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            var oldLoginDate = user.LastLoginDate;
+            // Update last login
+            user.LastLoginDate = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync("UserProfiles", user.ProfileId, "UPDATE", user.ProfileId, new { LastLoginDate = oldLoginDate }, new { user.LastLoginDate });
+
+            return Ok(new { token = tokenString, userType = user.UserType?.UserTypeName });
+        }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
         {
