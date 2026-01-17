@@ -10,7 +10,12 @@ export const login = async (username, password) => {
 };
 
 export const register = async (userData) => {
-  // userData matches RegistrationRequest.cs (FirstName, LastName, ExternalUserId, etc.)
-  const response = await api.post('/auth/register', userData);
+  // userData for register-dr just needs { username, password, email, firstName, lastName }
+  const response = await api.post('/auth/register-dr', userData);
+  return response.data;
+};
+
+export const resetPassword = async (passwordData) => {
+  const response = await api.post('/auth/reset-password', passwordData);
   return response.data;
 };

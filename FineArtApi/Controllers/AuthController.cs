@@ -191,6 +191,61 @@ namespace FineArtApi.Controllers
             }
         }
 
+        [HttpPost("register-dr")]
+        public async Task<IActionResult> RegisterDr([FromBody] RegisterDrDto registerDto)
+        {
+            try
+            {
+                if (await _context.UserProfiles.AnyAsync(u => u.Username == registerDto.Username))
+                    return BadRequest(new { message = "Username already exists" });
+
+                if (await _context.UserProfiles.AnyAsync(u => u.EmailAddress == registerDto.Email))
+                    return BadRequest(new { message = "Email address already in use" });
+
+                var employeeUserType = await _context.UserTypes.SingleOrDefaultAsync(ut => ut.UserTypeName == "Employee");
+                if (employeeUserType == null)
+                {
+                    return StatusCode(500, new { message = "Server configuration error: 'Employee' user type not found." });
+                }
+
+                var guestRole = await _context.UserRoles.SingleOrDefaultAsync(ur => ur.RoleName == "Guest");
+                if (guestRole == null)
+                {
+                    return StatusCode(500, new { message = "Server configuration error: 'Guest' role not found." });
+                }
+
+                CreatePasswordHash(registerDto.Password, out string passwordHash, out string passwordSalt);
+
+                var user = new UserProfile
+                {
+                    Username = registerDto.Username,
+                    EmailAddress = registerDto.Email,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName,
+                    PasswordHash = passwordHash,
+                    Salt = passwordSalt,
+                    CreatedAt = DateTime.UtcNow,
+                    ExternalUserId = Guid.NewGuid().ToString(), // As per existing register endpoint
+                    RoleId = guestRole.RoleId,
+                    UserTypeId = employeeUserType.UserTypeId,
+                    IsActive = true,
+                    MarketingConsent = false // Default for this registration type
+                };
+
+                _context.UserProfiles.Add(user);
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogAsync("UserProfiles", user.ProfileId, "INSERT", user.ProfileId, null, new { user.Username, user.EmailAddress, user.RoleId, user.UserTypeId });
+
+                return Ok(new { message = "Registration successful" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[RegisterDr Error] {ex}");
+                return StatusCode(500, new { message = $"Registration Error: {ex.Message}", details = ex.ToString() });
+            }
+        }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetDto)
         {
@@ -280,7 +335,22 @@ namespace FineArtApi.Controllers
         public int RoleId { get; set; }
         [JsonPropertyName("userTypeId")]
         public int UserTypeId { get; set; }
-        [JsonPropertyName("marketingConsent")]
-        public bool MarketingConsent { get; set; }
-    }
-}
+                [JsonPropertyName("marketingConsent")]
+                public bool MarketingConsent { get; set; }
+            }
+        
+            public class RegisterDrDto
+            {
+                [JsonPropertyName("username")]
+                public string Username { get; set; } = string.Empty;
+                [JsonPropertyName("password")]
+                public string Password { get; set; } = string.Empty;
+                [JsonPropertyName("email")]
+                public string Email { get; set; } = string.Empty;
+                [JsonPropertyName("firstName")]
+                public string FirstName { get; set; } = string.Empty;
+                [JsonPropertyName("lastName")]
+                public string LastName { get; set; } = string.Empty;
+            }
+        }
+        

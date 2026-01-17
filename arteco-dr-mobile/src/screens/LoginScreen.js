@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { login as loginService } from '../services/authservice';
 import { User, Lock } from 'lucide-react-native';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,6 +89,14 @@ const LoginScreen = () => {
               <Text style={styles.buttonText}>Sign In</Text>
             )}
           </TouchableOpacity>
+          <View style={styles.linksContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate('ResetPassword')}>
+              <Text style={styles.linkText}>Reset my password</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.linkText}>Register a new user</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -107,6 +115,15 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: '#1e293b' },
   button: { backgroundColor: '#246A73', height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 10 },
   buttonText: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  linksContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  linkText: {
+    color: '#246A73',
+    fontSize: 14,
+    marginBottom: 10,
+  },
 });
 
 export default LoginScreen;
