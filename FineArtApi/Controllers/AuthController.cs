@@ -125,50 +125,70 @@ namespace FineArtApi.Controllers
         [HttpPost("login-dr")]
         public async Task<IActionResult> LoginDr([FromBody] LoginDto loginDto)
         {
-            var user = await _context.UserProfiles
-                .Include(u => u.Role)
-                .Include(u => u.UserType)
-                .SingleOrDefaultAsync(u => u.Username == loginDto.Username);
-
-            if (user == null) return Unauthorized(new { message = "Invalid credentials" });
-
-            if (!VerifyPasswordHash(loginDto.Password, user.PasswordHash, user.Salt))
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            // Check if the user is an Employee
-            if (user.UserType?.UserTypeName != "Employee")
+            try
             {
-                return Unauthorized(new { message = "Access denied. Only employees can log in." });
-            }
+                var user = await _context.UserProfiles
+                    .Include(u => u.Role)
+                    .SingleOrDefaultAsync(u => u.Username == loginDto.Username);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            // Use a secure key from config in production
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "SuperSecretKeyForDevelopmentOnly12345!");
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
+                if (user == null)
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.ProfileId.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim("id", user.ProfileId.ToString()),
-                    new Claim(JwtRegisteredClaimNames.Sub, user.ProfileId.ToString()),
-                    new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "Guest"),
-                    new Claim("usertype", user.UserType?.UserTypeName ?? "")
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+                    return Unauthorized(new { message = "Invalid credentials" });
+                }
 
-            var oldLoginDate = user.LastLoginDate;
-            // Update last login
-            user.LastLoginDate = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+                if (!VerifyPasswordHash(loginDto.Password, user.PasswordHash, user.Salt))
+                {
+                    return Unauthorized(new { message = "Invalid credentials" });
+                }
 
-            await _auditService.LogAsync("UserProfiles", user.ProfileId, "UPDATE", user.ProfileId, new { LastLoginDate = oldLoginDate }, new { user.LastLoginDate });
+                var employeeUserType = await _context.UserTypes.SingleOrDefaultAsync(ut => ut.UserTypeName == "Employee");
+                if (employeeUserType == null)
+                {
+                    // This is a data setup problem.
+                    return StatusCode(500, new { message = "Server configuration error: 'Employee' user type not found." });
+                }
 
-            return Ok(new { token = tokenString, userType = user.UserType?.UserTypeName });
+                if (user.UserTypeId != employeeUserType.UserTypeId)
+                {
+                    return Unauthorized(new { message = "Access denied. Only employees can log in." });
+                }
+
+                // Eagerly load the UserType now that we have validated the user
+                var userType = await _context.UserTypes.FindAsync(user.UserTypeId);
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? "SuperSecretKeyForDevelopmentOnly12345!");
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.ProfileId.ToString()),
+                        new Claim(ClaimTypes.Name, user.Username),
+                        new Claim("id", user.ProfileId.ToString()),
+                        new Claim(JwtRegisteredClaimNames.Sub, user.ProfileId.ToString()),
+                        new Claim(ClaimTypes.Role, user.Role?.RoleName ?? "Guest"),
+                        new Claim("usertype", userType?.UserTypeName ?? "")
+                    }),
+                    Expires = DateTime.UtcNow.AddDays(7),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                var oldLoginDate = user.LastLoginDate;
+                user.LastLoginDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                await _auditService.LogAsync("UserProfiles", user.ProfileId, "UPDATE", user.ProfileId, new { LastLoginDate = oldLoginDate }, new { LastLoginDate = user.LastLoginDate });
+
+                return Ok(new { token = tokenString, userType = userType?.UserTypeName });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details for debugging
+                Console.WriteLine($"[LoginDr Error] {ex}");
+                return StatusCode(500, new { message = $"An unexpected server error occurred: {ex.Message}", details = ex.ToString() });
+            }
         }
 
         [HttpPost("reset-password")]
