@@ -121,6 +121,7 @@ namespace FineArtApi.Controllers
             return Ok(new { token = tokenString, userType = user.UserType?.UserTypeName });
         }
 
+        // Endpoint for the Defect Reporting mobile app
         [HttpPost("login-dr")]
         public async Task<IActionResult> LoginDr([FromBody] LoginDto loginDto)
         {

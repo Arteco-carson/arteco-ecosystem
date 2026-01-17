@@ -1,7 +1,11 @@
 import api from './api';
 
 export const login = async (username, password) => {
-  const response = await api.post('/auth/login', { username, password });
+  const response = await api.post('/auth/login-dr', { username, password }, {
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
   return response.data; // Returns { Token, Username, Role }
 };
 

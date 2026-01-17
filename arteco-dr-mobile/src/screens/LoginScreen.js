@@ -18,24 +18,27 @@ const LoginScreen = () => {
 
     setLoading(true);
     try {
-      const data = await loginService(username, password);
+      const data = await loginService(username.trim(), password);
       if (data.token) {
-        if (data.userType !== 'Employee') {
-          Alert.alert('Access Denied', 'Only Employees can access this application.');
-          return;
-        }
         login(data.token);
       } else {
         Alert.alert('Login Failed', 'Invalid response from server.');
       }
     } catch (error) {
       console.error(error);
+      const errorMessage = error.message || 'Unknown error';
       if (!error.response) {
-        Alert.alert('Network Error', 'Unable to connect to the server. Is the API running?');
+        Alert.alert('Connection Error', `Unable to connect to the server.\n\nDetails: ${errorMessage}`);
       } else if (error.response.status === 401) {
         Alert.alert('Login Failed', 'Invalid credentials.');
       } else {
-        Alert.alert('Login Failed', 'Server error. Please try again later.');
+        let serverMsg = 'No details provided by server';
+        const data = error.response.data;
+        if (data) {
+          serverMsg = typeof data === 'object' ? (data.message || JSON.stringify(data)) : String(data);
+        }
+        const helpText = error.response.status === 500 ? '\n\n(Check Azure Log Stream for C# exceptions)' : '';
+        Alert.alert('Login Failed', `Server error (${error.response.status}):\n${serverMsg}${helpText}`);
       }
     } finally {
       setLoading(false);
