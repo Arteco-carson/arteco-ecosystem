@@ -14,7 +14,7 @@ import CreateCollection from './components/CreateCollection';
 import Profile from './components/Profile';
 import AuditLogs from './components/AuditLogs';
 import MainLayout from './components/MainLayout';
-//Push build
+// Push build
 // Checks for the session token (ISO27001 Compliance)
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
